@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scroll Animation</title>
+    <style>
+      /* Ensure the canvas covers the viewport */
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow-x: hidden;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        min-height: 700dvh;
+      }
+
+      .img-seq-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: -1; /* Place it behind other content */
+      }
+
+      /* Add some scrollable content */
+      .scroll-content {
+        height: 200vh; /* Make the page scrollable */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: Arial, sans-serif;
+        font-size: 2rem;
+        color: #333;
+        background: linear-gradient(to bottom, #f0f0f0, #dcdcdc);
+      }
+
+      .scroll-content h1 {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Canvas for the animation -->
+    <canvas class="img-seq-canvas"></canvas>
+
+    <!-- Add a content placeholder to enable scrolling -->
+    <div class="scroll-content">
+      <h1>Scroll down to animate</h1>
+    </div>
+
+    <script>
+      const canvas = document.querySelector(".img-seq-canvas");
+      const ctx = canvas.getContext("2d");
+
+      // Set canvas dimensions to match the viewport
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      // Configuration
+      const frameCount = 300; // Total number of frames
+      const framePath = (index) =>
+        /*=============`downloads/manifesto${String(index).padStart(3, "0")}.jpg`;============= */
+
+        `https://www.cosmos.so/wp-content/themes/cosmos/public/images/sequence/manifesto${String(
+          index
+        ).padStart(3, "0")}.jpg`;
+      // Preload frames
+      const images = [];
+      let loadedImages = 0;
+
+      for (let i = 0; i < frameCount; i++) {
+        const img = new Image();
+        img.src = framePath(i);
+        images.push(img);
+
+        img.onload = () => {
+          loadedImages++;
+          if (loadedImages === frameCount) {
+            renderFrame(0); // Render the first frame when all images are loaded
+          }
+        };
+      }
+
+      // Function to render a specific frame
+      function renderFrame(frameIndex) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const img = images[frameIndex];
+        const aspectRatio = img.width / img.height;
+
+        // Scale and center the image
+        let renderWidth = canvas.width;
+        let renderHeight = canvas.width / aspectRatio;
+
+        if (renderHeight > canvas.height) {
+          renderHeight = canvas.height;
+          renderWidth = canvas.height * aspectRatio;
+        }
+
+        const xOffset = (canvas.width - renderWidth) / 2;
+        const yOffset = (canvas.height - renderHeight) / 2;
+
+        ctx.drawImage(img, xOffset, yOffset, renderWidth, renderHeight);
+      }
+
+      // Map scroll position to frame index
+      function getFrameIndexFromScroll() {
+        const scrollTop = window.scrollY; // Current scroll position
+        const maxScrollTop = document.body.scrollHeight - window.innerHeight; // Maximum scroll position
+        const scrollFraction = scrollTop / maxScrollTop; // Fraction of the page scrolled
+        return Math.min(
+          frameCount - 1,
+          Math.floor(scrollFraction * frameCount)
+        ); // Frame index
+      }
+
+      // Scroll event listener
+      window.addEventListener("scroll", () => {
+        const frameIndex = getFrameIndexFromScroll();
+        renderFrame(frameIndex);
+      });
+
+      // Resize canvas on window resize
+      window.addEventListener("resize", () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        renderFrame(getFrameIndexFromScroll());
+      });
+    </script>
+  </body>
+</html>
