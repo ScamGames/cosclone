@@ -12,11 +12,31 @@
         padding: 0;
         height: 100%;
         overflow-x: hidden;
-        scroll-behavior: smooth;
       }
 
       body {
         min-height: 700dvh;
+        background-color: black;
+        scroll-behavior: smooth;
+      }
+
+      /* Style the scrollbar */
+      ::-webkit-scrollbar {
+        width: 12px; /* Width of the scrollbar */
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #000; /* Background color of the scrollbar track */
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #d32f2f; /* Red scrollbar handle */
+        border-radius: 6px; /* Rounded edges */
+        border: 2px solid black; /* Add border for contrast */
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #ff5252; /* Lighter red on hover */
       }
 
       .img-seq-canvas {
@@ -28,16 +48,14 @@
         z-index: -1; /* Place it behind other content */
       }
 
-      /* Add some scrollable content */
       .scroll-content {
-        height: 20vh; /* Make the page scrollable */
+        height: 200vh;
         display: flex;
         align-items: center;
         justify-content: center;
         font-family: Arial, sans-serif;
         font-size: 2rem;
-        color: #333;
-        background: linear-gradient(to bottom, #f0f0f0, #dcdcdc);
+        color: white;
       }
 
       .scroll-content h1 {
@@ -65,11 +83,10 @@
       // Configuration
       const frameCount = 300; // Total number of frames
       const framePath = (index) =>
-        /*=============`downloads/manifesto${String(index).padStart(3, "0")}.jpg`;============= */
-
         `https://www.cosmos.so/wp-content/themes/cosmos/public/images/sequence/manifesto${String(
           index
         ).padStart(3, "0")}.jpg`;
+
       // Preload frames
       const images = [];
       let loadedImages = 0;
@@ -131,6 +148,28 @@
         canvas.height = window.innerHeight;
         renderFrame(getFrameIndexFromScroll());
       });
+
+      // Auto scroll animation (sliding effect)
+      let autoScroll = true;
+
+      function scrollPage() {
+        if (autoScroll) {
+          const scrollSpeed = 2; // Pixels per frame
+          const maxScrollTop = document.body.scrollHeight - window.innerHeight;
+          const currentScroll = window.scrollY;
+
+          if (currentScroll < maxScrollTop) {
+            window.scrollTo(0, currentScroll + scrollSpeed);
+            requestAnimationFrame(scrollPage);
+          }
+        }
+      }
+
+      scrollPage();
+
+      // Stop auto-scrolling on user interaction
+      window.addEventListener("wheel", () => (autoScroll = false));
+      window.addEventListener("keydown", () => (autoScroll = false));
     </script>
   </body>
 </html>
